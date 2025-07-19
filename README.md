@@ -80,6 +80,20 @@ Edit the `PREDATOR_KEY_COMMAND` in the script to your desired command:
 cd ~/predator-key/Predator/
 nano Predator-Key.py
 ```
+⚠️ Important Note on Paths
+
+Do not use ~ (tilde) shortcuts in paths for startup commands or .desktop files. Always use the full absolute path to your script or executable.
+
+For example, use:
+```
+/home/your-username/somescript.py
+```
+instead of
+```
+~/somescript.py
+```
+This ensures the script launches correctly on startup without path resolution issues.
+
 
 ```
 chmod +x Predator-Key.py

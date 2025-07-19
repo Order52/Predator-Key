@@ -68,16 +68,21 @@ Replace with the full path to your script.
     newgrp input
     ```
 
+4. (Optional) To run the script without sudo!
+```
+sudo chmod 666 /dev/input/event9
+```
+
 ## Usage
 
 Edit the `PREDATOR_KEY_COMMAND` in the script to your desired command:
 ```
+cd ~/predator-key/Predator/
 nano Predator-Key.py
 ```
 
 ```
 chmod +x Predator-Key.py
-sudo chmod 666 /dev/input/event9
 ```
 ```
 python Predator-Key.py

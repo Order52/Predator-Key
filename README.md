@@ -16,7 +16,7 @@ Tested on:
 - Debug logging for key events
 - Work on Startup
 
-🖥️ Run on Startup
+## 🖥️ Run on Startup
 
 You can run the script automatically at login using one of the following methods:
 1. Autostart (Desktop Environments)

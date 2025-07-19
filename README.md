@@ -14,6 +14,34 @@ Tested on:
 - Optional support for multiple additional commands
 - Built-in debounce to prevent repeated triggers
 - Debug logging for key events
+- Work on Startup
+
+🖥️ Run on Startup
+
+You can run the script automatically at login using one of the following methods:
+1. Autostart (Desktop Environments)
+
+For GNOME, KDE, XFCE, etc. create a .desktop entry:
+```bash
+cat > ~/.config/autostart/predator-key.desktop << EOF
+[Desktop Entry]
+Name=Predator Key Handler
+Exec=$HOME/predator-handler.py
+Type=Application
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+EOF
+```
+## 2. Hyprland (exec-once)
+
+If you're using Hyprland, add this line to your ~/.config/hypr/hyprland.conf:
+```
+exec-once = python3 ~/Predator/predator-handler.py
+
+```
+Replace with the full path to your script.
+
 
 ## Requirements
 

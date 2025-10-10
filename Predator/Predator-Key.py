@@ -16,7 +16,7 @@ EXTRA_COMMANDS = [
 DEBOUNCE_TIME = 0.3
 
 # Cache file to store detected device and key code
-CACHE_FILE = "/tmp/predator_key_cache.json"
+CACHE_FILE = "/tmp/predator_key.json"
 # ===================================
 
 def load_cache():
@@ -54,6 +54,7 @@ def detect_predator_key():
     
     start_time = time.time()
     timeout = 10
+    detected = False
     
     # Monitor all devices simultaneously
     while time.time() - start_time < timeout:
@@ -64,12 +65,24 @@ def detect_predator_key():
                     if event.type == evdev.ecodes.EV_KEY and event.value == 1:
                         # Filter out common keys
                         if event.code not in range(1, 90):  # Skip normal keyboard keys
-                            print(f"\n✓ DETECTED!")
-                            print(f"  Device: {device.name}")
-                            print(f"  Path: {device.path}")
-                            print(f"  Key Code: {event.code}")
-                            save_cache(device.path, event.code)
-                            return device.path, event.code
+                            if not detected:
+                                print(f"\n✓ DETECTED!")
+                                print(f"  Device: {device.name}")
+                                print(f"  Path: {device.path}")
+                                print(f"  Key Code: {event.code}")
+                                print("🔥 PREDATOR KEY PRESSED! 🔥")
+                                
+                                # Run the command immediately on detection
+                                try:
+                                    print(f"Running: {PREDATOR_KEY_COMMAND}")
+                                    subprocess.run(PREDATOR_KEY_COMMAND.split(), check=False)
+                                except Exception as e:
+                                    print(f"Error: {e}")
+                                
+                                save_cache(device.path, event.code)
+                                detected = True
+                                print("\nDetection complete! Continuing to monitor...\n")
+                                return device.path, event.code
             except BlockingIOError:
                 continue
             except:
@@ -88,11 +101,12 @@ def find_predator_device():
         device_path = cache.get("device")
         key_code = cache.get("key_code")
         if device_path and os.path.exists(device_path):
-            print(f"Using cached device: {device_path} (key code: {key_code})")
+            print(f"✓ Using cached device: {device_path} (key code: {key_code})")
+            print("  (To re-detect, delete: /tmp/predator_key_cache.json)\n")
             return device_path, key_code
     
     # Run detection
-    print("No cached device found. Running detection...")
+    print("No cached device found. Running detection...\n")
     return detect_predator_key()
 
 def handle_predator_key():

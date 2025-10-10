@@ -7,10 +7,24 @@ import os
 import json
 
 # ========== CONFIGURATION ==========
+# Change this to whatever you want your Predator key to do!
+# Examples:
+#   "firefox"                           # Open Firefox
+#   "code"                              # Open VS Code  
+#   "kitty"                             # Open Kitty terminal
+#   "/home/user/my-script.sh"           # Run custom script
+#   "gnome-calculator"                  # Open calculator
+#   "steam"                             # Open Steam
+#   "discord"                           # Open Discord
+#   "notify-send 'Hello' 'World!'"      # Show notification only
 PREDATOR_KEY_COMMAND = "python /home/o0xwolf/GitHub-SSD/PredatorSense-Linux/src/main.py"
+
+# Optional: Add multiple commands (all will run when key is pressed)
+# Leave empty [] if you only want the single command above
 
 EXTRA_COMMANDS = [
     # "notify-send 'Predator Key' 'Activated!'",
+    # "pactl set-sink-volume @DEFAULT_SINK@ +5%",  # Volume up
 ]
 
 DEBOUNCE_TIME = 0.3

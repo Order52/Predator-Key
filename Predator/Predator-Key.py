@@ -62,6 +62,14 @@ def detect_predator_key():
     print("\nPress your Predator key now (within 10 seconds)...")
     print("Monitoring all input devices...\n")
     
+    # Common keys to exclude (including Super/Meta keys)
+    EXCLUDED_KEYS = list(range(1, 90)) + [
+        125,  # KEY_LEFTMETA (Super/Windows key left)
+        126,  # KEY_RIGHTMETA (Super/Windows key right)
+        127,  # KEY_COMPOSE
+        139,  # KEY_MENU
+    ]
+    
     devices = []
     for path in evdev.list_devices():
         try:
@@ -80,13 +88,21 @@ def detect_predator_key():
                 # Non-blocking read
                 for event in device.read():
                     if event.type == evdev.ecodes.EV_KEY and event.value == 1:
-                        # Filter out common keys
-                        if event.code not in range(1, 90):  # Skip normal keyboard keys
+                        # Filter out common keys including Super key
+                        if event.code not in EXCLUDED_KEYS:
                             if not detected:
+                                # Get key name if available
+                                key_name = "UNKNOWN"
+                                try:
+                                    key_name = evdev.ecodes.KEY[event.code]
+                                except:
+                                    pass
+                                
                                 print(f"\n✓ DETECTED!")
                                 print(f"  Device: {device.name}")
                                 print(f"  Path: {device.path}")
                                 print(f"  Key Code: {event.code}")
+                                print(f"  Key Name: {key_name}")
                                 print("🔥 PREDATOR KEY PRESSED! 🔥")
                                 
                                 # Run the command immediately on detection

@@ -32,6 +32,8 @@ DEBOUNCE_TIME = 0.3
 
 # Cache file to store detected device and key code
 CACHE_FILE = "/tmp/predator_key.json"
+# Lock file to prevent multiple instances
+LOCK_FILE = "/tmp/predator_key.lock"
 # ===================================
 
 def load_cache():
@@ -210,13 +212,43 @@ def daemonize():
     with open('/dev/null', 'a+') as f:
         os.dup2(f.fileno(), sys.stderr.fileno())
 
+def check_singleton():
+    """Ensure only one instance is running"""
+    import fcntl
+    
+    # Try to open and lock the file
+    try:
+        lock_file = open(LOCK_FILE, 'w')
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # Write PID to lock file
+        lock_file.write(str(os.getpid()))
+        lock_file.flush()
+        return lock_file  # Keep file open to maintain lock
+    except IOError:
+        print("✗ Another instance is already running!")
+        print(f"  Lock file: {LOCK_FILE}")
+        print("\nTo kill all instances, run:")
+        print("  pkill -f Predator-Key.py")
+        sys.exit(1)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Predator Key Handler for Linux')
     parser.add_argument('--run-background', action='store_true',
                         help='Run in background (daemon mode)')
     args = parser.parse_args()
     
+    # Check for existing instance before doing anything
+    lock_file = check_singleton()
+    
     if args.run_background:
         daemonize()
     
-    handle_predator_key()
+    try:
+        handle_predator_key()
+    finally:
+        # Clean up lock file on exit
+        try:
+            lock_file.close()
+            os.remove(LOCK_FILE)
+        except:
+            pass

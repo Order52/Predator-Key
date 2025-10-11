@@ -5,6 +5,7 @@ import sys
 import time
 import os
 import json
+import argparse
 
 # ========== CONFIGURATION ==========
 # Change this to whatever you want your Predator key to do!
@@ -172,5 +173,50 @@ def handle_predator_key():
     except Exception as e:
         print(f"Error: {e}")
 
+def daemonize():
+    """Fork the process to run in background"""
+    try:
+        pid = os.fork()
+        if pid > 0:
+            # Parent process, exit
+            sys.exit(0)
+    except OSError as e:
+        print(f"Fork failed: {e}")
+        sys.exit(1)
+    
+    # Decouple from parent environment
+    os.chdir('/')
+    os.setsid()
+    os.umask(0)
+    
+    # Second fork
+    try:
+        pid = os.fork()
+        if pid > 0:
+            sys.exit(0)
+    except OSError as e:
+        print(f"Fork failed: {e}")
+        sys.exit(1)
+    
+    # Redirect standard file descriptors
+    sys.stdout.flush()
+    sys.stderr.flush()
+    
+    # Redirect to /dev/null
+    with open('/dev/null', 'r') as f:
+        os.dup2(f.fileno(), sys.stdin.fileno())
+    with open('/dev/null', 'a+') as f:
+        os.dup2(f.fileno(), sys.stdout.fileno())
+    with open('/dev/null', 'a+') as f:
+        os.dup2(f.fileno(), sys.stderr.fileno())
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Predator Key Handler for Linux')
+    parser.add_argument('--run-background', action='store_true',
+                        help='Run in background (daemon mode)')
+    args = parser.parse_args()
+    
+    if args.run_background:
+        daemonize()
+    
     handle_predator_key()

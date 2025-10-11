@@ -17,6 +17,7 @@ This Python script enables the special "Predator" key (usually located above the
 - **Smart Caching**: Saves configuration for instant startup on subsequent runs
 - **Universal Compatibility**: Works across different Acer Predator models without manual configuration
 - **Immediate Execution**: Runs your command from the very first press
+- **Background Mode**: Run as daemon without blocking startup scripts
 - Maps the key press to any custom command or script
 - Optional support for multiple additional commands
 - Built-in debounce to prevent repeated triggers
@@ -25,28 +26,37 @@ This Python script enables the special "Predator" key (usually located above the
 ## 🖥️ Run on Startup
 
 You can run the script automatically at login using one of the following methods:
-1. Autostart (Desktop Environments)
 
-For GNOME, KDE, XFCE, etc. create a .desktop entry:
+### 1. Window Managers (bspwm, i3, etc.)
+
+Add to your config file (e.g., `~/.config/bspwm/bspwmrc` or `~/.config/i3/config`):
+```bash
+sudo python3 /full/path/to/Predator/Predator-Key.py --run-background
+```
+
+### 2. Hyprland
+
+Add to `~/.config/hypr/hyprland.conf`:
+```bash
+exec-once = sudo python3 /full/path/to/Predator/Predator-Key.py --run-background
+```
+
+### 3. Desktop Environments (GNOME, KDE, XFCE)
+
+Create a .desktop entry:
 ```bash
 cat > ~/.config/autostart/predator-key.desktop << EOF
 [Desktop Entry]
 Name=Predator Key Handler
-Exec=$HOME/predator-handler.py
+Exec=sudo python3 /full/path/to/Predator/Predator-Key.py --run-background
 Type=Application
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
 EOF
 ```
-## 2. Hyprland (exec-once)
 
-If you're using Hyprland, add this line to your ~/.config/hypr/hyprland.conf:
-```
-exec-once = python3 ~/Predator/predator-handler.py
-
-```
-Replace with the full path to your script.
+> **Note**: Always use `--run-background` flag for startup scripts to prevent blocking!
 
 
 ## Requirements
@@ -121,6 +131,21 @@ After the first detection, the script uses the cached configuration and starts i
 ```bash
 sudo python3 Predator-Key.py
 ```
+
+### 4. Background Mode
+
+Run the script in the background (daemon mode) without blocking your terminal or startup scripts:
+```bash
+sudo python3 Predator-Key.py --run-background
+```
+
+This is perfect for adding to window manager configs like bspwmrc, i3 config, or Hyprland:
+```bash
+# In your bspwmrc or similar
+python3 /path/to/Predator/Predator-Key.py --run-background
+```
+
+The script will fork into the background immediately and won't block the rest of your configuration.
 
 ### Reset Detection
 

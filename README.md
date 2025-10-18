@@ -2,45 +2,61 @@
 
 This Python script enables the special "Predator" key (usually located above the keyboard on Acer Predator laptops) to work under Linux.
 
-Tested on:
-- Model: Acer Predator Helios 16
-- Module: PH16-71
-- Kernel Input: `ABS_MISC` via `/dev/input/event9`
+## Tested On
+
+| Model | Module | Kernel Input | Event Device |
+|-------|--------|--------------|--------------|
+| Acer Predator Helios 16 | PH16-71 | `ABS_MISC` | `/dev/input/event9` |
+| Acer Predator Helios 300 | PH315-52 | `KEY_PRESENTATION` | `/dev/input/event4` |
+
+> **Note**: With auto-detection, the script works on any Acer Predator model without manual configuration!
 
 ## Features
 
-- Detects Predator key press using `evdev`
-- Maps the key press to a custom command or script
+- **Auto-Detection**: Automatically detects the correct input device and key code
+- **Smart Caching**: Saves configuration for instant startup on subsequent runs
+- **Universal Compatibility**: Works across different Acer Predator models without manual configuration
+- **Immediate Execution**: Runs your command from the very first press
+- **Background Mode**: Run as daemon without blocking startup scripts
+- Maps the key press to any custom command or script
 - Optional support for multiple additional commands
 - Built-in debounce to prevent repeated triggers
-- Debug logging for key events
-- Work on Startup
+- Works on startup
 
 ## 🖥️ Run on Startup
 
 You can run the script automatically at login using one of the following methods:
-1. Autostart (Desktop Environments)
 
-For GNOME, KDE, XFCE, etc. create a .desktop entry:
+### 1. Window Managers (bspwm, i3, etc.)
+
+Add to your config file (e.g., `~/.config/bspwm/bspwmrc` or `~/.config/i3/config`):
+```bash
+sudo python3 /full/path/to/Predator/Predator-Key.py --run-background
+```
+
+### 2. Hyprland
+
+Add to `~/.config/hypr/hyprland.conf`:
+```bash
+exec-once = sudo python3 /full/path/to/Predator/Predator-Key.py --run-background
+```
+
+### 3. Desktop Environments (GNOME, KDE, XFCE)
+
+Create a .desktop entry:
 ```bash
 cat > ~/.config/autostart/predator-key.desktop << EOF
 [Desktop Entry]
 Name=Predator Key Handler
-Exec=$HOME/predator-handler.py
+Exec=sudo python3 /full/path/to/Predator/Predator-Key.py --run-background
 Type=Application
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
 EOF
 ```
-## 2. Hyprland (exec-once)
 
-If you're using Hyprland, add this line to your ~/.config/hypr/hyprland.conf:
-```
-exec-once = python3 ~/Predator/predator-handler.py
-
-```
-Replace with the full path to your script.
+> **Note**: Always use `--run-background` flag for startup scripts to prevent blocking!
 
 
 ## Requirements
@@ -68,36 +84,86 @@ Replace with the full path to your script.
     newgrp input
     ```
 
-4. (Optional) To run the script without sudo!
-```
-sudo chmod 666 /dev/input/event9
-```
+4. Make the script executable:
+    ```bash
+    chmod +x Predator/Predator-Key.py
+    ```
 
 ## Usage
 
+### 1. Configure Your Command
+
 Edit the `PREDATOR_KEY_COMMAND` in the script to your desired command:
-```
+```bash
 cd ~/predator-key/Predator/
 nano Predator-Key.py
 ```
-⚠️ Important Note on Paths
 
-Do not use ~ (tilde) shortcuts in paths for startup commands or .desktop files. Always use the full absolute path to your script or executable.
+Change this line to whatever you want:
+```python
+PREDATOR_KEY_COMMAND = "notify-send 'Hello' 'Linux!'"
+```
 
-For example, use:
+Examples:
+```python
+PREDATOR_KEY_COMMAND = "firefox"
+PREDATOR_KEY_COMMAND = "kitty"
+PREDATOR_KEY_COMMAND = "python /home/user/my-script.py"
 ```
-/home/your-username/somescript.py
-```
-instead of
-```
-~/somescript.py
-```
-This ensures the script launches correctly on startup without path resolution issues.
 
+### 2. First Run (Auto-Detection)
 
+Run the script with sudo:
+```bash
+sudo python3 Predator-Key.py
 ```
-chmod +x Predator-Key.py
+
+When prompted, **press your Predator key once**. The script will:
+- Automatically detect the correct input device (event4, event7, etc.)
+- Detect the correct key code
+- Save the configuration to `/tmp/predator_key.json`
+- Run your command immediately
+- Continue monitoring for future presses
+
+### 3. Subsequent Runs
+
+After the first detection, the script uses the cached configuration and starts immediately:
+```bash
+sudo python3 Predator-Key.py
 ```
+
+### 4. Background Mode
+
+Run the script in the background (daemon mode) without blocking your terminal or startup scripts:
+```bash
+sudo python3 Predator-Key.py --run-background
 ```
-python Predator-Key.py
+
+This is perfect for adding to window manager configs like bspwmrc, i3 config, or Hyprland:
+```bash
+# In your bspwmrc or similar
+python3 /path/to/Predator/Predator-Key.py --run-background
+```
+
+The script will fork into the background immediately and won't block the rest of your configuration.
+
+### Reset Detection
+
+If you need to re-detect (e.g., after hardware changes):
+```bash
+rm /tmp/predator_key.json
+```
+
+### ⚠️ Important Note on Paths
+
+Do not use `~` (tilde) shortcuts in paths for startup commands or .desktop files. Always use the full absolute path.
+
+✅ Correct:
+```python
+PREDATOR_KEY_COMMAND = "python /home/username/script.py"
+```
+
+❌ Incorrect:
+```python
+PREDATOR_KEY_COMMAND = "python ~/script.py"
 ```
